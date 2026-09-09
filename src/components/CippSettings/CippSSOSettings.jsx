@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { CippIcons } from "../../utils/icon-registry";
 import {
   Accordion,
   AccordionDetails,
@@ -15,11 +16,11 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
 } from "@mui/material";
-import { ExpandMore } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { Grid } from "@mui/system";
 import CippFormComponent from "../CippComponents/CippFormComponent";
@@ -67,32 +68,43 @@ const samPermissionsUsed = [
   },
 ];
 
-const PermissionTable = ({ rows, typeLabel }) => (
-  <Table size="small" sx={{ "& td, & th": { px: 1, verticalAlign: "top" } }}>
-    <TableHead>
-      <TableRow>
-        <TableCell sx={{ width: "40%" }}>Permission</TableCell>
-        <TableCell>Why it is needed</TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {rows.map((row) => (
-        <TableRow key={row.name}>
-          <TableCell>
-            <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-              {row.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {typeLabel}
-            </Typography>
-          </TableCell>
-          <TableCell>
-            <Typography variant="body2">{row.reason}</Typography>
-          </TableCell>
+// Exported for the phone-width overflow story: readable consent text is this table's job.
+export const PermissionTable = ({ rows, typeLabel }) => (
+  // TableContainer: the surrounding Card sets overflow: hidden, which cut this table off
+  // with no scroll path — an admin could not read the permission they were asked to approve.
+  // The monospace names also break, so a phone rarely needs the scrollbar at all.
+  <TableContainer>
+    <Table size="small" sx={{ "& td, & th": { px: 1, verticalAlign: "top" } }}>
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ width: "40%" }}>Permission</TableCell>
+          <TableCell>Why it is needed</TableCell>
         </TableRow>
-      ))}
-    </TableBody>
-  </Table>
+      </TableHead>
+      <TableBody>
+        {rows.map((row) => (
+          <TableRow key={row.name}>
+            <TableCell>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: "monospace", overflowWrap: "anywhere" }}
+              >
+                {row.name}
+              </Typography>
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
+                {typeLabel}
+              </Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="body2">{row.reason}</Typography>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
 );
 
 const statusLabels = {
@@ -310,7 +322,7 @@ export const CippSSOSettings = () => {
               defaultExpanded={false}
               sx={{ "&:before": { display: "none" } }}
             >
-              <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+              <AccordionSummary expandIcon={<CippIcons.ExpandMore />} sx={{ px: 0 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   About the CIPP-SSO app registration
                 </Typography>
@@ -340,9 +352,11 @@ export const CippSSOSettings = () => {
                     <PermissionTable rows={ssoAppPermissions} typeLabel="Delegated · Microsoft Graph" />
                     <Typography
                       variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 1 }}
-                    >
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                        mt: 1
+                      }}>
                       No application (app-only) permissions are requested, so the app can never act
                       without a signed-in user. None of these scopes grant access to mail, files,
                       Teams or directory data — they are the standard OpenID Connect sign-in scopes,
@@ -358,9 +372,11 @@ export const CippSSOSettings = () => {
                     <PermissionTable rows={samPermissionsUsed} typeLabel="Application · on CIPP-SAM" />
                     <Typography
                       variant="caption"
-                      color="text.secondary"
-                      sx={{ display: "block", mt: 1 }}
-                    >
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                        mt: 1
+                      }}>
                       These are part of the standard CIPP-SAM permission set and were consented when
                       CIPP was installed — nothing new is requested during setup. If setup fails on
                       one of these steps, your CIPP-SAM consent predates that permission and needs
@@ -401,24 +417,30 @@ export const CippSSOSettings = () => {
 
             <Divider />
 
-            <Grid container spacing={2} alignItems="center">
-              <Grid size={{ xs: 4 }}>
-                <Typography variant="body2" color="text.secondary">
+            <Grid container spacing={2} sx={{
+              alignItems: "center"
+            }}>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Status
                 </Typography>
               </Grid>
-              <Grid size={{ xs: 8 }}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <Chip label={statusInfo.label} color={statusInfo.color} size="small" />
               </Grid>
 
               {hasAppId && (
                 <>
-                  <Grid size={{ xs: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Admin Consent
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 8 }}>
+                  <Grid size={{ xs: 12, md: 8 }}>
                     <Chip
                       label={preconsentInfo.label}
                       color={preconsentInfo.color}
@@ -427,9 +449,11 @@ export const CippSSOSettings = () => {
                     {data?.preconsented === false && (
                       <Typography
                         variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block", mt: 0.5 }}
-                      >
+                        sx={{
+                          color: "text.secondary",
+                          display: "block",
+                          mt: 0.5
+                        }}>
                         {data?.preconsentError
                           ? `Users will be prompted to consent at sign-in. ${data.preconsentError}`
                           : "Users will be prompted to consent at sign-in."}
@@ -441,12 +465,14 @@ export const CippSSOSettings = () => {
 
               {data?.appId && (
                 <>
-                  <Grid size={{ xs: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       App ID
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 8 }}>
+                  <Grid size={{ xs: 12, md: 8 }}>
                     <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                       {data.appId}
                     </Typography>
@@ -456,13 +482,17 @@ export const CippSSOSettings = () => {
 
               {signInHosts.length > 0 && (
                 <>
-                  <Grid size={{ xs: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Sign-in URLs
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 8 }}>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Grid size={{ xs: 12, md: 8 }}>
+                    <Stack direction="row" spacing={1} useFlexGap sx={{
+                      flexWrap: "wrap"
+                    }}>
                       {signInHosts.map((host) => (
                         <Chip
                           key={host}
@@ -475,9 +505,11 @@ export const CippSSOSettings = () => {
                     {missingSignInHosts.length > 0 && (
                       <Typography
                         variant="caption"
-                        color="text.secondary"
-                        sx={{ display: "block", mt: 0.5 }}
-                      >
+                        sx={{
+                          color: "text.secondary",
+                          display: "block",
+                          mt: 0.5
+                        }}>
                         {missingSignInHosts.join(", ")}{" "}
                         {missingSignInHosts.length === 1 ? "is" : "are"} bound to this
                         instance but not registered on the app. Click{" "}
@@ -488,9 +520,11 @@ export const CippSSOSettings = () => {
                     {domainsUnverified && (
                       <Typography
                         variant="caption"
-                        color="warning.main"
-                        sx={{ display: "block", mt: 0.5 }}
-                      >
+                        sx={{
+                          color: "warning.main",
+                          display: "block",
+                          mt: 0.5
+                        }}>
                         This list may be incomplete — the custom domains bound to this
                         instance could not be read, so a domain that cannot sign in would not
                         show up here.
@@ -503,12 +537,14 @@ export const CippSSOSettings = () => {
 
               {data?.createdAt && (
                 <>
-                  <Grid size={{ xs: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Created
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 8 }}>
+                  <Grid size={{ xs: 12, md: 8 }}>
                     <Typography variant="body2">
                       {new Date(data.createdAt).toLocaleString()}
                     </Typography>
@@ -565,7 +601,7 @@ export const CippSSOSettings = () => {
             <CippApiResults apiObject={ssoAction} />
 
             <Accordion disableGutters elevation={0} sx={{ "&:before": { display: "none" } }}>
-              <AccordionSummary expandIcon={<ExpandMore />} sx={{ px: 0 }}>
+              <AccordionSummary expandIcon={<CippIcons.ExpandMore />} sx={{ px: 0 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   Manual configuration (advanced)
                 </Typography>
@@ -614,7 +650,9 @@ export const CippSSOSettings = () => {
                     formControl={manualFormControl}
                   />
 
-                  <Stack direction="row" justifyContent="flex-end">
+                  <Stack direction="row" sx={{
+                    justifyContent: "flex-end"
+                  }}>
                     <Button
                       variant="contained"
                       color="warning"
